@@ -1,0 +1,23 @@
+{
+  "id": "97afc57f-e10a-42ff-b19a-fc4ca743c011",
+  "name": "ALProject3",
+  "publisher": "Default publisher",
+  "brief": "",
+  "description": "",
+  "version": "1.0.0.0",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "capabilities": [],
+  "dependencies": [],
+  "screenshots": [],
+  "platform": "13.0.0.0",
+  "application": "13.0.0.0",
+  "idRange": {
+    "from": 50100,
+    "to": 50149
+  },
+  "runtime": "2.0"
+}

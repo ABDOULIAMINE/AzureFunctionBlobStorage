@@ -24,7 +24,8 @@ namespace BlobStorage
             dynamic data = await req.Content.ReadAsAsync<object>();
             string base64String = data.base64;
             string fileName = data.fileName;
-            Uri uri = await UploadBlobAsync(base64String,fileName);
+            string fileType= data.fileType;
+            Uri uri = await UploadBlobAsync(base64String,fileName,fileType);
             return req.CreateResponse(HttpStatusCode.Accepted, uri);
         }
 
@@ -35,8 +36,8 @@ namespace BlobStorage
             dynamic data = await req.Content.ReadAsAsync<object>();
             string url = data.url;
             string fileName = data.fileName;
-            await DownloadBlobAsync(url, fileName);
-            return req.CreateResponse(HttpStatusCode.Accepted);
+            byte[] x = await DownloadBlobAsync(url, fileName);
+            return req.CreateResponse(HttpStatusCode.Accepted,x);
         }
 
         private static Match GetMatch(string base64, string type)
@@ -71,10 +72,10 @@ namespace BlobStorage
               .Match(base64);
         }
 
-        public static async Task<Uri> UploadBlobAsync(string base64String,string fileName)
+        public static async Task<Uri> UploadBlobAsync(string base64String,string fileName,string filetype)
         {
 
-            var match = GetMatch(base64String,"pdf");
+            var match = GetMatch(base64String,filetype);
             string contentType = match.Groups["type"].Value;
             string extension = contentType.Split('/')[1];
             fileName = $"{fileName}.{extension}";
@@ -101,17 +102,24 @@ namespace BlobStorage
             return blob.Uri;
         }
 
-        public static async Task DownloadBlobAsync(string url, string fileName)
+        public static async Task<byte[]> DownloadBlobAsync(string url, string fileName)
         {
             
             CloudStorageAccount storageAccount =
-              CloudStorageAccount.Parse("XXXXX");
+              CloudStorageAccount.Parse("XXXX");
             CloudBlobClient client = storageAccount.CreateCloudBlobClient();
             CloudBlobContainer container = client.GetContainerReference("files");
 
             CloudBlockBlob blob = container.GetBlockBlobReference(fileName);
-
-            await blob.DownloadToFileAsync(@"C:\temp\"+fileName, FileMode.OpenOrCreate);
+            await blob.FetchAttributesAsync();
+            long fileByteLength = blob.Properties.Length;
+            byte[] fileContent = new byte[fileByteLength];
+            for (int i = 0; i < fileByteLength; i++)
+            {
+                fileContent[i] = 0x20;
+            }
+            await blob.DownloadToByteArrayAsync(fileContent, 0);
+            return fileContent;
 
         }
     }
